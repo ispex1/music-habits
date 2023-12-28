@@ -1,10 +1,11 @@
 #import library
+
 library(ggplot2)
 library(dplyr)
 library(readr)
 
 
-data <- read.csv("data.csv")
+data <- read.csv("data/data.csv")
 
 # define the ts column as a date/time object
 data$ts <- as.POSIXct(data$ts, format="%Y-%m-%d %H:%M:%S")
