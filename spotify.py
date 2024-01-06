@@ -6,12 +6,9 @@ from spotipy.oauth2 import SpotifyOAuth
 
 # SPOTIFY API  #
 
-config = configparser.ConfigParser()
-config.read('spotify_credentials.txt')
-
-client_id = config.get('Credentials', 'CLIENT_ID')
-client_secret = config.get('Credentials', 'CLIENT_SECRET')
-redirect_uri = config.get('Credentials', 'REDIRECT_URI')
+client_id = '940531cb78bd4bceac2c8ccecf92d424'
+client_secret = '8bb55f62a0fb415fa283235343a911a3'
+redirect_uri = 'http://localhost:3333'
 
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope='user-library-read'))
 
@@ -56,8 +53,8 @@ print(f"Test saved to CSV file: {csv_file_path}")
 
 # Read iteratively endsong_n.json files and save them to a single DataFrame
 df = pd.DataFrame()
-for i in range(8):
-    df = pd.concat([df, pd.read_json(f'data/endsong_{i}.json', orient='records')])
+for i in range(9):
+    df = pd.concat([df, pd.read_json(f'data/gabriel/endsong_{i}.json', orient='records')])
 
 # Delete rows with missing artist name
 df.dropna(subset=['master_metadata_album_artist_name'], inplace=True)
@@ -96,6 +93,6 @@ with open('output.txt', 'w', encoding='utf-8') as f:
 df['genres'] = df['master_metadata_album_artist_name'].map(artists_genres)
 
 # Save DataFrame to CSV file
-csv_file_path = 'data/data.csv'
+csv_file_path = 'data/gabriel/data.csv'
 df.to_csv(csv_file_path, index=False)
 print(f"DataFrame saved to CSV file: {csv_file_path}")
