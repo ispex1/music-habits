@@ -22,9 +22,17 @@ def get_artist_genres(artist_name):
     if results['artists']['items']:
         artist = results['artists']['items'][0]
         genres = artist['genres']
+        if genres.__len__() == 0:
+            genres = None
+        else:
+            genres = ', '.join(genres)
         return genres
     else:
         return None
+    
+artist_name = 'The Beatles'
+genres = get_artist_genres(artist_name)
+print(f"{artist_name} genres: {genres}")
 
 # ------------- TEST --------------- # 
 '''
@@ -56,7 +64,7 @@ print(f"Test saved to CSV file: {csv_file_path}")
 
 # Read iteratively endsong_n.json files and save them to a single DataFrame
 df = pd.DataFrame()
-for i in range(8):
+for i in range(9):
     df = pd.concat([df, pd.read_json(f'data/endsong_{i}.json', orient='records')])
 
 # Delete rows with missing artist name
@@ -96,6 +104,6 @@ with open('output.txt', 'w', encoding='utf-8') as f:
 df['genres'] = df['master_metadata_album_artist_name'].map(artists_genres)
 
 # Save DataFrame to CSV file
-csv_file_path = 'data/data.csv'
+csv_file_path = 'data/databis.csv'
 df.to_csv(csv_file_path, index=False)
 print(f"DataFrame saved to CSV file: {csv_file_path}")
