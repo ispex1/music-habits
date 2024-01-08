@@ -5,6 +5,7 @@ library(readr)
 library(lubridate)
 library(gghighlight)
 library(ggrepel)
+library(tidyr)
 
 data <- read.csv("data/esteban/data.csv")
 
@@ -15,26 +16,18 @@ data$ts <- as.POSIXct(data$ts, format="%Y-%m-%d %H:%M:%S")
 data$day <- weekdays(data$ts)
 
 # Quick informations about the data
-summary(data)
+#summary(data)
 
-df_filtered <- data[data$genres %in% "vaporwave", ]
-write.csv(df_filtered, "data/vaporwave.csv")
+# top 10 artists listened
+data_artists <- data %>% group_by(master_metadata_album_artist_name) %>% summarise(count=n(), hours=sum(ms_played/3600000)) %>% arrange(desc(count))
+# I want to add a column with the percentage of the total number of songs listened
+data_artists <- data_artists %>% mutate(percentage = count / sum(count) * 100)
+# Add an index column
+data_artists <- data_artists %>% mutate(index = 1:n())
 
-# Return the top 10 artists listened and print it
-top10artists <- data %>% group_by(master_metadata_album_artist_name) %>% summarise(count=n()) %>% arrange(desc(count)) %>% head(10) %>% ungroup()
+# Create a cumulative percentage column
+data_artists <- data_artists %>% arrange(desc(count)) %>% mutate(cumulative_percentage = cumsum(percentage))
 
-# Group_by every songs by month/year and add the ms_played each time its grouped 
-evolution <- data %>% group_by(master_metadata_album_artist_name, month =as.Date(floor_date(ts,"month"))) %>% summarise(hours=sum(ms_played/3600000))
+# save it in a csv file
+write.csv(data_artists, "data/data_artists.csv")
 
-# Plot the evolution of the top 10 artists listened
-ggplot(evolution, aes(x=month, y=hours, color=master_metadata_album_artist_name)) + 
-    geom_line() +
-    scale_x_date(date_breaks = "9 month", date_labels = "%b %Y") +
-    gghighlight(master_metadata_album_artist_name %in% top10artists$master_metadata_album_artist_name, label_params = list(size = 10)) +
-    labs(title = "Evolution of the top 10 artists listened", subtitle = "From 2018 to 2023", color = "Top 10 artists") +
-    xlab("")+
-    theme_light()
-
-
-#save it in a csv file
-write.csv(evolution, "data/evolution.csv")
