@@ -3,11 +3,25 @@ library(lubridate)
 library(ggplot2)
 library(dplyr)
 library(readr)
-install.packages("data.tree")
 library(data.tree)
+library(gghighlight)
 
 
-data <- read.csv("data/data.csv")
+theme_pal <- theme_minimal()+
+  theme(axis.text.y = element_blank(),
+        axis.line.y = element_blank(),
+        axis.title = element_blank(),
+        panel.grid.major = element_blank(),
+        legend.title = element_blank(),
+        axis.text.x = element_text(vjust = 3),
+        panel.grid.minor = element_blank(),
+        plot.title = element_text(size = 14, face = "bold")
+  )
+
+
+col_pal <- brewer.pal(9, "YlGn")
+
+data <- read.csv("data/gabriel/data.csv")
 
 # define the ts column as a date/time object
 data$ts <- as.POSIXct(data$ts, format="%Y-%m-%d %H:%M:%S")
@@ -33,10 +47,19 @@ weekly_time <- data %>%
   group_by(ts = floor_date(ts, "week")) %>% 
   summarize(hours_played = sum(ms_played)/(1000*60*60)) %>%
   arrange(ts) %>%
-  ggplot(aes(x = ts, y = hours_played)) +
-  geom_col(aes(fill = hours_played))
+  ggplot(aes(x = ts, y = 1)) +
+  geom_col(aes(fill = hours_played))+
+  scale_y_discrete(expand = c(0, 0))+
+  scale_fill_gradientn(colors = rev(col_pal), trans='reverse')+
+  guides(fill = guide_colorbar(barwidth = 1))+
+  labs(title = "Testouille",
+       caption = "test analysis")+
+  theme_pal
+  
 
 weekly_time
+
+
 
 
 
