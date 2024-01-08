@@ -129,6 +129,7 @@ data_este <- load_data("data/esteban/data.csv")
 data_gab <- load_data("data/gabriel/data.csv")
 
 
+
 data_este %>%
   filter(ts >= as.Date("2023-01-01")) %>%
   mutate(last_genre = word(global_genre, -1, sep = ", ")) %>%
@@ -142,6 +143,7 @@ data_este %>%
   ylab("Count") +
   theme_minimal()+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
 
 
 # Quick informations about the data
@@ -168,13 +170,24 @@ weekly_time <- data %>%
        caption = "test analysis")+
   theme_pal
 
-
 weekly_time
 
-#Comparaison genre este VS gab
 
-gab_rap <- data_gab[grepl("rap", data_gab$genres, ignore.case = TRUE) |
-                       grepl("hip hop", data_gab$genres, ignore.case = TRUE), ]
+
+#Comparaison genre este VS gab
+counts_este <- data_este %>%
+  group_by(global_genre) %>%
+  summarise(count_df_a = n())
+
+
+# Création du graphique
+ggplot(data_percentages, aes(x = percentage, y = global_genre, fill = dataset)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  ggtitle("Pourcentage de lignes par global_genre dans les deux datasets") +
+  xlab("Pourcentage") +
+  ylab("Global Genre") +
+  theme_minimal() +
+  theme(legend.position = "top")
 
 # save data as a csv file
 write.csv(data, "data.csv")
