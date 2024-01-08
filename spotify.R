@@ -4,6 +4,7 @@ library(dplyr)
 library(readr)
 library(lubridate)
 library(gghighlight)
+library(ggrepel)
 
 data <- read.csv("data/esteban/data.csv")
 
@@ -27,10 +28,10 @@ evolution <- data %>% group_by(master_metadata_album_artist_name, month =as.Date
 
 # Plot the evolution of the top 10 artists listened
 ggplot(evolution, aes(x=month, y=hours, color=master_metadata_album_artist_name)) + 
-    geom_line() + 
+    geom_line() +
     scale_x_date(date_breaks = "9 month", date_labels = "%b %Y") +
-    gghighlight(master_metadata_album_artist_name %in% top10artists$master_metadata_album_artist_name, use_direct_label = FALSE, unhighlighted_params = list(alpha = 0.2), max.overlaps == 10) +
-    labs(title = "Evolution of the top 10 artists listened", subtitle = "From 2018 to 2023") +
+    gghighlight(master_metadata_album_artist_name %in% top10artists$master_metadata_album_artist_name, label_params = list(size = 10)) +
+    labs(title = "Evolution of the top 10 artists listened", subtitle = "From 2018 to 2023", color = "Top 10 artists") +
     xlab("")+
     theme_light()
 

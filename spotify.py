@@ -65,7 +65,7 @@ print(f"Test saved to CSV file: {csv_file_path}")
 # Read iteratively endsong_n.json files and save them to a single DataFrame
 df = pd.DataFrame()
 for i in range(9):
-    df = pd.concat([df, pd.read_json(f'data/endsong_{i}.json', orient='records')])
+    df = pd.concat([df, pd.read_json(f'data/gabriel/endsong_{i}.json', orient='records')])
 
 # Delete rows with missing artist name
 df.dropna(subset=['master_metadata_album_artist_name'], inplace=True)
