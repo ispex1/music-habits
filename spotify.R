@@ -55,7 +55,7 @@ weekly_time <- data %>%
   labs(title = "Testouille",
        caption = "test analysis")+
   theme_pal
-  
+
 
 weekly_time
 
@@ -65,4 +65,3 @@ weekly_time
 
 # save data as a csv file
 write.csv(data, "data.csv")
-
