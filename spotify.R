@@ -6,7 +6,9 @@ library(readr)
 library(data.tree)
 library(gghighlight)
 library(stringr)
-
+library(tidyr)
+library(ggrepel)
+library(RColorBrewer)
 
 theme_pal <- theme_minimal()+
   theme(axis.text.y = element_blank(),
@@ -83,12 +85,6 @@ load_data <- function(path) {
                                           paste(data$global_genre, "reggae", sep = ", "), 
                                           "reggae"), 
                                    data$global_genre)
-  #metal (on en écoute même pas lol)
-  data$global_genre <- ifelse(grepl("metal", data$genres, ignore.case = TRUE), 
-                                   ifelse(!is.na(data$global_genre), 
-                                          paste(data$global_genre, "metal", sep = ", "), 
-                                          "metal"), 
-                                   data$global_genre)
   #rnb
   data$global_genre <- ifelse(grepl("r&b", data$genres, ignore.case = TRUE), 
                                    ifelse(!is.na(data$global_genre), 
@@ -131,7 +127,6 @@ data_gab <- load_data("data/gabriel/data.csv")
 
 
 data_este %>%
-  filter(ts >= as.Date("2023-01-01")) %>%
   mutate(last_genre = word(global_genre, -1, sep = ", ")) %>%
   group_by(last_genre) %>%
   summarise(count = n()) %>%
@@ -173,21 +168,35 @@ weekly_time <- data %>%
 weekly_time
 
 
+data_genre_raw <- data_este %>% group_by(global_genre) %>% summarize(count = n())
 
 #Comparaison genre este VS gab
-counts_este <- data_este %>%
-  group_by(global_genre) %>%
-  summarise(count_df_a = n())
+data_genre <- function(data) {
+  data <- data %>% 
+  separate_rows(global_genre, sep = ", ") %>% 
+  mutate(global_genre = trimws(global_genre)) %>%
+  group_by(global_genre) %>% 
+  summarise(count = n(), hours = sum(ms_played/3600000)) %>% 
+  arrange(desc(count))
+  
+  return(data)
+}
+
+data_genre_este <- data_genre(data_este)
+data_genre_gab <- data_genre(data_gab)
+
+total <- merge(data_genre_este, data_genre_gab, by = "global_genre", all=TRUE)
+total$total = total$count.x + total$count.y
+
+ggplot(total, aes(x = genre, y = percentage, fill = factor(count))) +
+  geom_bar(stat = "identity") +
+  labs(title = "Percentage of Count for Each Genre (Dataframe B)",
+       x = "Genre",
+       y = "Percentage") +
+  scale_fill_brewer(palette = "Set3") +
+  theme_minimal()
 
 
-# Création du graphique
-ggplot(data_percentages, aes(x = percentage, y = global_genre, fill = dataset)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  ggtitle("Pourcentage de lignes par global_genre dans les deux datasets") +
-  xlab("Pourcentage") +
-  ylab("Global Genre") +
-  theme_minimal() +
-  theme(legend.position = "top")
 
 # save data as a csv file
 write.csv(data, "data.csv")
