@@ -1,3 +1,5 @@
+# 1st plots to understand the data
+
 # Plot the number of songs played by day of the week
 ggplot(data, aes(x=day)) + geom_bar() + ggtitle("Number of songs played by day of the week")
 
@@ -13,8 +15,7 @@ ggplot(data, aes(x=year(ts))) + geom_bar() + ggtitle("Number of songs played by 
 # Plot the number of songs played by year and month
 ggplot(data, aes(x=month(ts), fill=year(ts))) + geom_bar() + ggtitle("Number of songs played by year and month")
 
-# I want to make a research on the "genre" listened if I am at home or not (When I am at home, the Platform is Home Speaker)
-# I will create a new column with the information if I am at home or not
+# Creation of a new column with the information if I am at home or not
 data$home <- ifelse(data$platform == "Home Speaker", "Home", "Not Home")
 
 # Plot the number of songs played by genre and if I am at home or not
@@ -46,11 +47,15 @@ weekly_time
 
 # EVOLUTION OF THE TOP 10 ARTISTS LISTENED
 
-# Return the top 10 artists listened and print it
-top10artists <- data %>% group_by(master_metadata_album_artist_name) %>% summarise(count=n()) %>% arrange(desc(count)) %>% head(10) %>% ungroup()*
+# Return the top 10 artists listened
+top10artists <- data %>%
+  count(master_metadata_album_artist_name, sort = TRUE) %>%
+  head(10)
 
 # Group_by every songs by month/year and add the ms_played each time its grouped 
-evolution <- data %>% group_by(master_metadata_album_artist_name, month=as.Date(floor_date(ts,"month"))) %>% summarise(hours=sum(ms_played/3600000))
+evolution <- data %>% 
+  group_by(master_metadata_album_artist_name, month=as.Date(floor_date(ts,"month"))) %>% 
+  summarise(hours=sum(ms_played/3600000))
 
 # Plot the evolution of the top 10 artists listened
 ggplot(evolution, aes(x=month, y=hours, color=master_metadata_album_artist_name)) + 
