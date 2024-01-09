@@ -6,28 +6,33 @@ library(lubridate)
 library(gghighlight)
 library(ggrepel)
 library(tidyr)
+library(reshape2)
 
-data <- read.csv("data/esteban/data.csv")
+data <- read.csv("data/data_este.csv")
 
-# define the ts column as a date/time object
-data$ts <- as.POSIXct(data$ts, format="%Y-%m-%d %H:%M:%S")
+#make ts a date
+data$ts <- as.POSIXct(data$ts, format = "%Y-%m-%d %H:%M:%S")
 
-# create a new column with the day of the week
-data$day <- weekdays(data$ts)
+data_genre <- data %>% 
+  separate_rows(global_genre, sep = ", ") %>% 
+  mutate(month = floor_date(ts, "2 months")) %>% 
+  group_by(month, global_genre) %>% 
+  summarise(count = n()) %>% 
+  ungroup()
 
-# Quick informations about the data
-#summary(data)
+data_genre <- data_genre %>%
+  group_by(month) %>%
+  mutate(percent = count / sum(count) * 100) %>%
+  ungroup()
 
-# top 10 artists listened
-data_artists <- data %>% group_by(master_metadata_album_artist_name) %>% summarise(count=n(), hours=sum(ms_played/3600000)) %>% arrange(desc(count))
-# I want to add a column with the percentage of the total number of songs listened
-data_artists <- data_artists %>% mutate(percentage = count / sum(count) * 100)
-# Add an index column
-data_artists <- data_artists %>% mutate(index = 1:n())
+# Plot the geom_area
+ggplot(data_genre, aes(x = month, y = percent, fill = global_genre)) +
+  geom_area() +
+  labs(title = "Tendances des genres musicaux au fil du temps",
+       x = "Année",
+       y = "Pourcentage",
+       fill = "Genre") +
+  theme_minimal()
 
-# Create a cumulative percentage column
-data_artists <- data_artists %>% arrange(desc(count)) %>% mutate(cumulative_percentage = cumsum(percentage))
-
-# save it in a csv file
-write.csv(data_artists, "data/data_artists.csv")
+  
 
