@@ -88,8 +88,8 @@ load_data <- function(path) {
 }
 
 
-data_este <- load_data("../data/esteban/data.csv")
-write.csv(data_este, "../data/data_este.csv", row.names = FALSE)
+data_este <- load_data("./data/esteban/data.csv")
+write.csv(data_este, "./data/data_este.csv", row.names = FALSE)
 
-data_gab <- load_data("../data/gabriel/data.csv")
-write.csv(data_gab, "../data/data_gab.csv", row.names = FALSE)
+data_gab <- load_data("./data/gabriel/data.csv")
+write.csv(data_gab, "./data/data_gab.csv", row.names = FALSE)
